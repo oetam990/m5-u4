@@ -26,14 +26,36 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
   secret: 'hsdhuyrbfjkfkkdfsjad',
+  cookie: {maxAge: null},
   resave: false,
   saveUninitialized: true
 }));
+
+secured = async (req, res, next) => {
+  try {
+    console.log(req.session.id_usuario);
+    if (req.session.id_usuario) {
+      next();
+    } else {
+      res.render('admin/login', {
+        layout: 'admin/layout'
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/admin/login', loginRouter);
-app.use('/admin/novedades', adminRouter);
+app.use('/admin/novedades', secured, adminRouter);
 
+app.get('/logout', function (req, res, next) {
+  req.session.destroy()
+  res.render('admin/login', {
+    layout: 'admin/layout'
+  });
+});
 //Consulta select
 // pool.query('select * from usuarios').then(function (resultados) { 
 //   console.log(resultados)
